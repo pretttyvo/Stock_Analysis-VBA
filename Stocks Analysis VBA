@@ -1,0 +1,133 @@
+Sub stocks()
+    'create a loop for every worksheet
+    For Each ws In Worksheets
+        'create variable for total volume
+        Dim total As Double
+        'create variable for ticker name
+        Dim name As String
+        'create variable for data placement
+        Dim data_placement As Integer
+        'create variable for opening total
+        Dim opening As Double
+        'create variabel for closing total
+        Dim closing As Double
+        'create variable for yearly change
+        Dim yearly_change As Double
+        'create variable for the percentage change
+        Dim percent_change As Double
+        'create variable for greatest % increase
+        Dim greatest_percent_increase As Double
+        'create variable for greatest % decrease
+        Dim greatest_percent_decrease As Double
+        'create variable for greatest total volume
+        Dim greatest_total_volume As Double
+
+
+        'begin total volume at zero
+        total = 0
+        'Label the title for the ticker names
+        ws.Cells(1, 9).Value = "Ticker"
+        'label the title for the volume names
+        ws.Cells(1, 10).Value = "Volume Total"
+        'label the title for the yearly change
+        ws.Cells(1, 11).Value = "Yearly Change"
+        'label the title for the percentage change
+        ws.Cells(1, 12).Value = "Percent Change"
+        'label the title for the greatest percentage increase
+        ws.Cells(2, 17).Value = "Greatest percentage increase"
+        'label the title for the greatest percentage decrease
+        ws.Cells(3, 17).Value = "Greatest percentage decrease"
+        'label the title for the greatest total volume
+        ws.Cells(4, 17).Value = "Greatest Total Volume"
+        'label the title for max and min ticker
+        ws.Cells(1, 18).Value = "Ticker"
+        'label the title for max and min value
+        ws.Cells(1, 19).Value = "Value"
+        'place data in the second row
+        data_placement = 2
+        'assign value to first opening cell
+        opening = Cells(2, 3).Value
+    
+            'create loop for ticker testing
+            For i = 2 To ws.Cells(Rows.Count, 1).End(xlUp).Row
+                'check if the cells are the same or different
+                If ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1).Value Then
+                    'put the name of the same data into a cell
+                    name = ws.Cells(i, 1).Value
+                    'add up the total volume
+                    total = total + ws.Cells(i, 7).Value
+                    'collect closing value
+                    closing = Cells(i, 6).Value
+                    'calculate the yearly change
+                    yearly_change = closing - opening
+                    'calculate the percent change
+                    'eliminate zeros
+                    If opening = 0 Then
+                        percent_change = 0
+                    Else
+                        percent_change = (closing - opening) / opening
+                    End If
+                    'place the name into the summary data set
+                    ws.Cells(data_placement, 9).Value = name
+                    'place the total volume into the summary data set
+                    ws.Cells(data_placement, 10).Value = total
+                    'place the yearly change into the summary data
+                    ws.Cells(data_placement, 11).Value = yearly_change
+                    'place the percentage change into the summary table
+                    ws.Cells(data_placement, 12).Value = percent_change
+                        'conditional format positive and negative cells
+                    If percent_change > 0 Then
+                        ws.Cells(data_placement, 11).Interior.ColorIndex = 4
+                    ElseIf percent_change < 0 Then
+                        ws.Cells(data_placement, 11).Interior.ColorIndex = 3
+                    End If
+                    'set up the placement for the next row
+                    data_placement = data_placement + 1
+                    'put the total back at zero for the next ticker
+                    total = 0
+                    'put opening total back at zero
+                    opening = Cells(i + 1, 3).Value
+                    'put closing total back at zero
+                    closing = 0
+                Else
+                    'add the the volumes where the tickers are the same
+                    total = total + ws.Cells(i, 7).Value
+                End If
+            Next i
+
+            'determine the last cell in row
+            LastRow = ws.Cells(Rows.Count, 9).End(xlUp).Row
+
+
+
+            'find the greatest percent increase
+            greatest_percent_increase = Application.Max(ws.Range("L2:L" & LastRow))
+            'find the greatest percent decrease
+            greatest_percent_decrease = Application.Min(ws.Range("L2:L" & LastRow))
+            'find the greatest total volume
+            greatest_total_volume = Application.Max(ws.Range("J2:J" & LastRow))
+
+            'Create loop to search through calculated data
+            For j = 2 To ws.Cells(Rows.Count, 9).End(xlUp).Row
+                'create conditions for max and min
+                If ws.Cells(j, 12).Value = greatest_percent_decrease Then
+                    ws.Cells(3, 18).Value = ws.Cells(j, 9).Value
+                    ws.Cells(3, 19).Value = greatest_percent_decrease
+        
+                ElseIf ws.Cells(j, 12).Value = greatest_percent_increase Then
+                    ws.Cells(2, 18).Value = ws.Cells(j, 9).Value
+                    ws.Cells(2, 19).Value = greatest_percent_increase
+
+                ElseIf ws.Cells(j, 10).Value = greatest_total_volume Then
+                    ws.Cells(4, 18).Value = ws.Cells(j, 9).Value
+                    ws.Cells(4, 19).Value = greatest_total_volume
+                End If
+            Next j
+        'convert to percentages
+        ws.Range("L2:L" & LastRow).NumberFormat = "0.00%"
+        ws.Range("S2:S3").NumberFormat = "0.00%"
+    Next ws
+End Sub
+
+
+
